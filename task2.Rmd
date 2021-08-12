@@ -1,0 +1,102 @@
+---
+title: "Task2"
+author: "Pavitra Desai"
+date: "13/08/2021"
+output:
+   html_document:
+     keep_md: yes
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# The Sparks Foundation - Data Science and Business Analytics 
+### Task#2 : Prediction using Unsupervised Machine Learning 
+### Problem Statement: From the given ‘Iris’ dataset, predict the optimum number of clusters and represent it visually.
+**Importing necessary libraries**
+```{r}
+library(ggplot2)
+library(gridExtra)
+```
+  
+**Downloading and viewing Data**
+```{r}
+# data is readily available in RStudio "datasets" package
+data(iris)
+summary(iris)
+head(iris)
+dim(iris)
+```
+  
+iris consist of 150 rows 5 columns    
+**Preprocessing Data**
+```{r}
+is.null(iris)
+any(is.na(iris))
+data<-iris[,1:4]
+species<-iris[,5]
+head(data)
+table(species)
+```
+  
+iris is clean ie no null or na values .   
+data is subset of iris with only needed columns.   
+species shows original cluster having 50 values each.        
+**Visualizing Data using Density Plot**
+```{r}
+plot1 <-    ggplot(iris, aes(x=Petal.Length, colour=Species, fill=Species)) +
+  geom_density(alpha=0.5) +
+  theme(legend.position="none")
+plot2<- ggplot(iris, aes(x=Petal.Width, colour=Species, fill=Species)) +
+  geom_density(alpha=0.5) +
+  theme(legend.position="none")
+plot3 <- ggplot(iris, aes(x=Sepal.Width, colour=Species, fill=Species)) +
+  geom_density(alpha=0.5) +
+  theme(legend.position="none")
+plot4 <- ggplot(iris, aes(x=Sepal.Length, colour=Species, fill=Species))+
+  geom_density(alpha=0.5) 
+# Plot all density plots together
+grid.arrange(plot1,plot2 ,plot3 ,plot4,nrow = 2
+)
+```
+  
+**Clustering Data using K-Means**   
+k should be 3 because there are 3 different species    
+Verifying using elbow method 
+```{r}
+wss <- sapply(1:10,function(k){kmeans(data, k, nstart=50,iter.max = 10)$tot.withinss})
+plot(1:10, wss,type = "b")
+```
+    
+   Verified k=3
+```{r}
+set.seed(120)
+k3<-kmeans(data,3)
+k3
+#Comparing the predicted clusters with the original Clusters.
+table(k3$cluster, iris$Species)
+```
+  
+**Visualizing result**
+```{r}
+plota<-ggplot(iris, aes(x = Sepal.Length , y = Sepal.Width)) + 
+  geom_point(aes(color = as.factor(k3$cluster))) +
+  scale_color_discrete(name = " ", breaks=c("1", "2", "3"),labels=c("Sentosa", "virginica","versicolor")) +
+  ggtitle("Cluster")
+plotb<-ggplot(data=iris, aes(x =Sepal.Length , y = Sepal.Width)) +
+  geom_point(aes(color=Species)) +
+  ggtitle("Original")
+plotc<-ggplot(iris, aes(x = Petal.Length , y = Petal.Width)) + 
+  geom_point(aes(color = as.factor(k3$cluster))) +
+  scale_color_discrete(name = " ", breaks=c("1", "2", "3"),labels=c("Sentosa", "virginica","versicolor")) +
+  ggtitle("Cluster")
+plotd<-ggplot(data=iris, aes(x =Petal.Length , y = Petal.Width)) +
+  geom_point(aes(color=Species)) +
+  ggtitle("Original")
+grid.arrange(plota,plotb,plotc,plotd,nrow=2)
+```
+  
+The plots are almost similar except for a few outliers.
+  
+# Thank You
